@@ -9,7 +9,7 @@ public class AbstractShip{
     private Orientation orientation;
 
 
-    AbstractShip(String name, Character label, int size, Orientation orientation){
+    public AbstractShip(String name, Character label, int size, Orientation orientation){
         this.name = name;
         this.label = label;
         this.size = size;
@@ -25,7 +25,7 @@ public class AbstractShip{
         return this.name;
     }
 
-    public int getSize(){
+    public int getLength(){
         return this.size;
     }
 

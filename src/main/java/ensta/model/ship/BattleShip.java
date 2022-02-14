@@ -3,11 +3,11 @@ package ensta.model.ship;
 import ensta.util.Orientation;
 
 public class BattleShip extends AbstractShip{
-    BattleShip(String name, Character label, int size, Orientation orientation){
-        super(name, label, size, orientation);
+    public BattleShip(Orientation orientation){
+        super("BattleShip", 'B', 4, orientation);
     }
 
-    BattleShip(String name, Character label, int size){
-        super(name, label, size, Orientation.WEST);
+    public BattleShip(){
+        super("BattleShip", 'B', 4, Orientation.WEST);
     }
 }

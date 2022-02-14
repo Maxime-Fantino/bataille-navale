@@ -1,10 +1,14 @@
 package ensta.model;
+
+import ensta.model.ship.AbstractShip;
+import ensta.util.Orientation;
+
 /*
 import ensta.model.ship.AbstractShip;
 import ensta.util.Orientation;
 import javax.crypto.spec.ChaCha20ParameterSpec;
 */
-public class Board //implements IBoard
+public class Board implements IBoard
 {
 
   private static final int DEFAULT_SIZE = 10;
@@ -43,53 +47,110 @@ public class Board //implements IBoard
   }
 
   public void print() {
-	String horizontal = "   ";
-	for(int i=65; i<65+size; ++i){
-		horizontal += (char)i;
-	}
+	  String horizontal = "   ";
+	  for(int i=65; i<65+size; ++i){
+		  horizontal += (char)i;
+  	}
 	
-	System.out.println("Navires :");
-	System.out.println(horizontal);
-	for(int i=0; i<size; ++i){
-		System.out.print(i+1);
-			if(i>=10){
-				System.out.print(" ");
-			} else {
-			System.out.print("  ");
-			}
-		for(int j=0; j<size-1; ++j){
-			System.out.print(this.tableauNom[i][j] + " ");
-		}
-		System.out.println(this.tableauNom[i][size-1]);
-	}
+	  System.out.println("Navires :");
+	  System.out.println(horizontal);
+	  for(int i=0; i<size; ++i){
+		  System.out.print(i+1);
+			  if(i>=10){
+				  System.out.print(" ");
+			  } else {
+			  System.out.print("  ");
+			  }
+		  for(int j=0; j<size-1; ++j){
+			  System.out.print(this.tableauNom[i][j] + " ");
+		  }
+		  System.out.println(this.tableauNom[i][size-1]);
+	  }
 
-	System.out.println("");
+	  System.out.println("");
 
-	System.out.println("Frappes :");
-	System.out.println(horizontal);
-	for(int i=0; i<size; ++i){
-		System.out.print(i+1);
-			if(i>=10){
-				System.out.print(" ");
-			} else {
-			System.out.print("  ");
-			}
-		for(int j=0; j<size-1; ++j){
-			if(this.tableauCoup[i][j]){
-				System.out.print("x ");
-			} else {
-				System.out.print(". ");
-			}
-		}
-		if(this.tableauCoup[i][size-1]){
-			System.out.print("x ");
-		} else {
-			System.out.print(". ");
-		}
-	}
+	  System.out.println("Frappes :");
+	  System.out.println(horizontal);
+	  for(int i=0; i<size; ++i){
+		  System.out.print(i+1);
+			  if(i>=10){
+				  System.out.print(" ");
+			  } else {
+			  System.out.print("  ");
+			  }
+		  for(int j=0; j<size-1; ++j){
+			  if(this.tableauCoup[i][j]){
+				  System.out.print("x ");
+			  } else {
+				  System.out.print(". ");
+			  }
+		  }
+		  if(this.tableauCoup[i][size-1]){
+			  System.out.print("x ");
+		  } else {
+			  System.out.print(". ");
+		  }
+	  }
   }
 
-  /*
+
+
+  public int getSize(){
+    return size;
+  }
+
+
+
+  public boolean putShip(AbstractShip ship, Coords coords) {
+    if(ship.getOrientation() == Orientation.NORTH){
+      if(!canPutShip(ship, coords)){
+        System.out.println("Coordonnées invalides !");
+        return false;
+      } else {
+        for(int i=0; i<ship.getLength(); ++i){
+          tableauNom[coords.getX() - i][coords.getY()] = ship.getLabel();
+        }
+        return true;
+      }
+    } else if(ship.getOrientation() == Orientation.SOUTH){
+      if(!canPutShip(ship, coords)){
+        System.out.println("Coordonnées invalides !");
+        return false;
+      } else {
+        for(int i=0; i<ship.getLength(); ++i){
+          tableauNom[coords.getX() + i][coords.getY()] = ship.getLabel();
+        }
+        return true;
+      }
+    } else if(ship.getOrientation() == Orientation.EAST){
+      if(!canPutShip(ship, coords)){
+        System.out.println("Coordonnées invalides !");
+        return false;
+      } else {
+        for(int i=0; i<ship.getLength(); ++i){
+          tableauNom[coords.getX()][coords.getY() + i] = ship.getLabel();
+        }
+        return true;
+      }
+    } else {
+      if(!canPutShip(ship, coords)){
+        System.out.println("Coordonnées invalides !");
+        return false;
+      } else {
+        for(int i=0; i<ship.getLength(); ++i){
+          tableauNom[coords.getX()][coords.getY() - i] = ship.getLabel();
+        }
+        return true;
+      }
+    }
+  }
+
+
+  public boolean hasShip(Coords coords){
+    return (tableauNom[coords.getX()][coords.getY()] == '.');
+  }
+
+
   public boolean canPutShip(AbstractShip ship, Coords coords)
   {
     Orientation o = ship.getOrientation();
@@ -128,5 +189,13 @@ public class Board //implements IBoard
 
     return true;
   }
-  */
+  
+
+  public void setHit(boolean hit, Coords coords){
+    tableauCoup[coords.getX()][coords.getY()] = hit;
+  }
+
+  public Boolean getHit(Coords coords){
+    return tableauCoup[coords.getX()][coords.getY()];
+  }
 }

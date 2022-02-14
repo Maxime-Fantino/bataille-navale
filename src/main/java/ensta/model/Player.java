@@ -35,8 +35,11 @@ public class Player {
 	 * coodrinates.
 	 */
 	public void putShips() {
+
 		boolean done = false;
 		int i = 0;
+		Coords coords = new Coords(0,0);
+		Boolean flagPutShip = false;
 
 		do {
 			AbstractShip ship = ships[i];
@@ -44,12 +47,31 @@ public class Player {
 			System.out.println(msg);
 			InputHelper.ShipInput res = InputHelper.readShipInput();
 			// TODO set ship orientation
-			// TODO put ship at given position
-			// TODO when ship placement successful
-			++i;
-			done = i == 5;
+			switch (res.orientation){
+				case "north": 	ship.setOrientation(Orientation.NORTH);
+								break;
+				case "south": 	ship.setOrientation(Orientation.SOUTH);
+								break;
+				case "east": 	ship.setOrientation(Orientation.EAST);
+								break;
+				case "west": 	ship.setOrientation(Orientation.WEST);
+								break;
+			}
 
-			board.print();
+			coords.setX(res.x);
+			coords.setY(res.y);
+			
+			// TODO put ship at given position
+			flagPutShip = board.putShip(ship, coords);
+
+			// TODO when ship placement successful
+			if(flagPutShip){
+				++i;
+				board.print();
+			}
+
+			done = (i == 5);
+
 		} while (!done);
 	}
 

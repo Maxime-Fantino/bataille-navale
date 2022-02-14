@@ -33,7 +33,6 @@ public class AbstractShip{
         return this.orientation;
     }
 
-
     public void setOrientation(Orientation orientation){
         this.orientation = orientation;
     }  

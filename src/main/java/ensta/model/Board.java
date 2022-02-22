@@ -1,7 +1,10 @@
 package ensta.model;
 
 import ensta.model.ship.AbstractShip;
+import ensta.model.ship.ShipState;
+import ensta.model.ship.NullShip;
 import ensta.util.Orientation;
+import ensta.util.ColorUtil;
 
 /*
 import ensta.model.ship.AbstractShip;
@@ -14,7 +17,7 @@ public class Board implements IBoard
   private static final int DEFAULT_SIZE = 10;
   private String name;
   private int size;
-  private Character[][] tableauNom;
+  private ShipState[][] tableauNom;
   private Boolean[][] tableauCoup;
 
   public Board(String name, int size)
@@ -29,7 +32,7 @@ public class Board implements IBoard
     
     for (int i = 0; i < size; ++i) {
       for (int j = 0; j < size; ++j) {
-        this.tableauNom[i][j] = '.';
+        this.tableauNom[i][j] = new ShipState();
         this.tableauCoup[i][j] = false;
       }
     }
@@ -40,7 +43,7 @@ public class Board implements IBoard
     this.name = name;
     for (int i = 0; i < DEFAULT_SIZE; ++i) {
       for (int j = 0; j < DEFAULT_SIZE; ++j) {
-        this.tableauNom[i][j] = '.';
+        this.tableauNom[i][j] = new ShipState();
         this.tableauCoup[i][j] = false;
       }
     }
@@ -52,7 +55,7 @@ public class Board implements IBoard
 		  horizontal += (char)i;
   	}
 	
-	  System.out.println("Navires :");
+	  System.out.println("NAVIRES :");
 	  System.out.println(horizontal);
 	  for(int i=0; i<size; ++i){
 		  System.out.print(i+1);
@@ -69,7 +72,7 @@ public class Board implements IBoard
 
 	  System.out.println("");
 
-	  System.out.println("Frappes :");
+	  System.out.println("FRAPPES :");
 	  System.out.println(horizontal);
 	  for(int i=0; i<size; ++i){
 		  System.out.print(i+1);
@@ -78,17 +81,20 @@ public class Board implements IBoard
 			  } else {
 			  System.out.print("  ");
 			  }
-		  for(int j=0; j<size-1; ++j){
+		  for(int j=0; j<size; ++j){
 			  if(this.tableauCoup[i][j]){
-				  System.out.print("x ");
+				  if(tableauNom[i][j].isStruck()){
+            System.out.print(ColorUtil.colorize("x ", ColorUtil.Color.RED));
+          } else {
+            System.out.print("x ");
+          }
 			  } else {
 				  System.out.print(". ");
 			  }
-		  }
-		  if(this.tableauCoup[i][size-1]){
-			  System.out.print("x ");
-		  } else {
-			  System.out.print(". ");
+        // saut de ligne à la fin
+        if(j == size-1){
+          System.out.println("");
+        }
 		  }
 	  }
   }
@@ -108,7 +114,8 @@ public class Board implements IBoard
         return false;
       } else {
         for(int i=0; i<ship.getLength(); ++i){
-          tableauNom[coords.getX() - i][coords.getY()] = ship.getLabel();
+          (tableauNom[coords.getX() - i][coords.getY()]).setShip(ship);
+          (tableauNom[coords.getX() - i][coords.getY()]).setStruck(false);
         }
         return true;
       }
@@ -118,7 +125,8 @@ public class Board implements IBoard
         return false;
       } else {
         for(int i=0; i<ship.getLength(); ++i){
-          tableauNom[coords.getX() + i][coords.getY()] = ship.getLabel();
+          (tableauNom[coords.getX() + i][coords.getY()]).setShip(ship);
+          (tableauNom[coords.getX() + i][coords.getY()]).setStruck(false);
         }
         return true;
       }
@@ -128,7 +136,8 @@ public class Board implements IBoard
         return false;
       } else {
         for(int i=0; i<ship.getLength(); ++i){
-          tableauNom[coords.getX()][coords.getY() + i] = ship.getLabel();
+          (tableauNom[coords.getX()][coords.getY() + i]).setShip(ship);
+          (tableauNom[coords.getX()][coords.getY() + i]).setStruck(false);
         }
         return true;
       }
@@ -138,7 +147,8 @@ public class Board implements IBoard
         return false;
       } else {
         for(int i=0; i<ship.getLength(); ++i){
-          tableauNom[coords.getX()][coords.getY() - i] = ship.getLabel();
+          (tableauNom[coords.getX()][coords.getY() - i]).setShip(ship);
+          (tableauNom[coords.getX()][coords.getY() - i]).setStruck(false);
         }
         return true;
       }
@@ -147,7 +157,7 @@ public class Board implements IBoard
 
 
   public boolean hasShip(Coords coords){
-    return (tableauNom[coords.getX()][coords.getY()] == '.');
+    return ((tableauNom[coords.getX() - 1][coords.getY() - 1]).getShip().getName() == "NullShip");
   }
 
 
@@ -191,8 +201,26 @@ public class Board implements IBoard
   }
   
 
-  public void setHit(boolean hit, Coords coords){
-    tableauCoup[coords.getX()][coords.getY()] = hit;
+  public Hit sendHit(int x, int y){
+
+    if(this.tableauCoup[x-1][y-1]){
+      System.out.println("Un coup a déjà été joué a cet endroit !");
+      return Hit.MISS;
+    } else {
+      if(tableauNom[x-1][y-1].getShip().getName() == "NullShip"){
+        System.out.println("Manqué !");
+        return Hit.MISS;
+      } else {
+        tableauNom[x-1][y-1].setStruck(true);
+        tableauNom[x-1][y-1].addStrike();
+        if(tableauNom[x-1][y-1].getShip().getStrikeCount() == tableauNom[x-1][y-1].getShip().getLength()){
+          System.out.println(tableauNom[x-1][y-1].getShip().getName() + " Coulé !");
+          return Hit.fromInt(tableauNom[x-1][y-1].getShip().getLength());
+        }
+        System.out.println("Touché !");
+        return Hit.STRIKE;
+      }
+    }  
   }
 
   public Boolean getHit(Coords coords){

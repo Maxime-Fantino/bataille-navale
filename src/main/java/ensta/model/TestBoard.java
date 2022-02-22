@@ -6,6 +6,7 @@ import ensta.model.ship.Destroyer;
 import ensta.model.ship.Submarine;
 import ensta.util.Orientation;
 
+
 public class TestBoard {
     public static void main(String args[]) {
         Board board1 = new Board("board1");
@@ -29,5 +30,8 @@ public class TestBoard {
         board1.putShip(destroyer, coordsOk1);
         board1.putShip(submarine, coordsOk2);
         board1.putShip(submarine, coordsOk3);
+
+        Hit hit1 = board1.sendHit(5, 5);
+        Hit hit2 = board1.sendHit(5, 6);
     }
 }

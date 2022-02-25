@@ -41,7 +41,7 @@ public class AbstractShip
     public void addStrike() { this.strikeCount++; }
 
     public boolean isSunk() {
-        String[] possibleNames = {"Destroyer", "Submarine", "BattleShp", "Carrier"};
+        String[] possibleNames = {"Destroyer", "Submarine", "BattleShip", "Carrier"};
         int[] sunkSizes = {2,3,4,5};
         boolean res = false;
         for(int i=0; i<4; ++i){

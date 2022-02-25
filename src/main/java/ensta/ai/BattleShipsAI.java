@@ -61,17 +61,14 @@ public class BattleShipsAI implements Serializable {
 	 * @param ships the ships to put
 	 */
 	public void putShips(AbstractShip ships[]) {
-		Coords coords = new Coords(0,0);
+		Coords coords;
 		Orientation orientation;
 		Orientation[] orientations = Orientation.values();
-		Random rd = new Random();
 
 		for (AbstractShip ship : ships) {
 			do {
 				// TODO use Random to pick a random x, y & orientation
-  				coords.setX(rd.nextInt(board.getSize()));
-				coords.setY(rd.nextInt(board.getSize()));
-				orientation = Orientation.randomOrientation();
+				coords = Coords.randomCoords(board.getSize());
 			} while (!board.canPutShip(ship, coords));
 
 			board.putShip(ship, coords);
@@ -142,7 +139,7 @@ public class BattleShipsAI implements Serializable {
 	}
 
 	private boolean isUndiscovered(Coords coords) {
-		return coords.isInBoard(board.getSize()) && board.getHit(coords) == null;
+		return (coords.isInBoard(board.getSize()) && board.getHit(coords) == false);
 	}
 
 	private Coords pickRandomCoords() {
@@ -164,6 +161,9 @@ public class BattleShipsAI implements Serializable {
 		int y = lastStrike.getY();
 
 		for (int iy : new int[] { y - 1, y + 1 }) {
+			// pour ne pas sortir du cadre
+			if(iy < 0){ iy = 0; }
+			if(iy > board.getSize() - 1){ iy = board.getSize() - 1; }
 			Coords coords = new Coords(x, iy);
 			if (isUndiscovered(coords)) {
 				return coords;
@@ -182,6 +182,9 @@ public class BattleShipsAI implements Serializable {
 		int y = lastStrike.getY();
 
 		for (int ix : new int[] { x - 1, x + 1 }) {
+			// pour ne pas sortir du cadre
+			if(ix < 0){ ix = 0; }
+			if(ix > board.getSize() - 1){ ix = board.getSize() - 1; }
 			Coords coords = new Coords(ix, y);
 			if (isUndiscovered(coords)) {
 				return coords;

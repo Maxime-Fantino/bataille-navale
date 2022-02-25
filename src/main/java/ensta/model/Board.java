@@ -14,22 +14,20 @@ import javax.crypto.spec.ChaCha20ParameterSpec;
 public class Board implements IBoard
 {
 
-  private static final int DEFAULT_SIZE = 10;
+  private static final int DEFAULT_SIZE = 5;
   private String name;
   private int size;
   private ShipState[][] tableauNom;
   private Boolean[][] tableauCoup;
 
-  public Board(String name, int size)
+
+  public Board(String name)
   {
     this.name = name;
-	if(size > 26){
-		this.size = 26;
-		System.out.println("Taille limitée à 26");
-	} else {
-		this.size = size;
-	}
+	  this.size = DEFAULT_SIZE;
     
+    this.tableauNom = new ShipState[size][size];
+    this.tableauCoup = new Boolean[size][size];
     for (int i = 0; i < size; ++i) {
       for (int j = 0; j < size; ++j) {
         this.tableauNom[i][j] = new ShipState();
@@ -38,52 +36,65 @@ public class Board implements IBoard
     }
   }
 
-  public Board(String name)
+  
+  public Board(String name, int size)
   {
     this.name = name;
-    for (int i = 0; i < DEFAULT_SIZE; ++i) {
-      for (int j = 0; j < DEFAULT_SIZE; ++j) {
+	  if(size > 26){
+		  this.size = 26;
+		  System.out.println("Taille limitée à 26");
+	  } else {
+		  this.size = size;
+	  }
+    
+    this.tableauNom = new ShipState[size][size];
+    this.tableauCoup = new Boolean[size][size];
+    for (int i = 0; i < size; ++i) {
+      for (int j = 0; j < size; ++j) {
         this.tableauNom[i][j] = new ShipState();
         this.tableauCoup[i][j] = false;
       }
     }
   }
 
-  public void print() {
+
+
+  public void printAll() {
+    // lettres
 	  String horizontal = "   ";
 	  for(int i=65; i<65+size; ++i){
-		  horizontal += (char)i;
+		  horizontal += (char)i + " ";
   	}
 	
 	  System.out.println("NAVIRES :");
 	  System.out.println(horizontal);
-	  for(int i=0; i<size; ++i){
-		  System.out.print(i+1);
-			  if(i>=10){
+	  for(int l=0; l<size; ++l){
+		  System.out.print(l);
+			  if(l>=10){
 				  System.out.print(" ");
 			  } else {
 			  System.out.print("  ");
 			  }
-		  for(int j=0; j<size-1; ++j){
-			  System.out.print(this.tableauNom[i][j] + " ");
+		  for(int c=0; c<size-1; ++c){
+			  System.out.print(this.tableauNom[c][l] + " ");
 		  }
-		  System.out.println(this.tableauNom[i][size-1]);
+		  System.out.println(this.tableauNom[size-1][l]);
 	  }
 
 	  System.out.println("");
 
 	  System.out.println("FRAPPES :");
 	  System.out.println(horizontal);
-	  for(int i=0; i<size; ++i){
-		  System.out.print(i+1);
-			  if(i>=10){
+	  for(int l=0; l<size; ++l){
+		  System.out.print(l);
+			  if(l>=10){
 				  System.out.print(" ");
 			  } else {
 			  System.out.print("  ");
 			  }
-		  for(int j=0; j<size; ++j){
-			  if(this.tableauCoup[i][j]){
-				  if(tableauNom[i][j].isStruck()){
+		  for(int c=0; c<size; ++c){
+			  if(this.tableauCoup[c][l]){
+				  if(tableauNom[c][l].isStruck()){
             System.out.print(ColorUtil.colorize("x ", ColorUtil.Color.RED));
           } else {
             System.out.print("x ");
@@ -92,15 +103,52 @@ public class Board implements IBoard
 				  System.out.print(". ");
 			  }
         // saut de ligne à la fin
-        if(j == size-1){
+        if(c == size-1){
           System.out.println("");
         }
 		  }
 	  }
+    System.out.println("");
   }
 
 
+  // print seulement le tableau des coups
+  public void printCoups() {
+    // lettres
+	  String horizontal = "   ";
+	  for(int i=65; i<65+size; ++i){
+		  horizontal += (char)i + " ";
+  	}
 
+	  System.out.println("FRAPPES :");
+	  System.out.println(horizontal);
+	  for(int l=0; l<size; ++l){
+		  System.out.print(l);
+			  if(l>=10){
+				  System.out.print(" ");
+			  } else {
+			  System.out.print("  ");
+			  }
+		  for(int c=0; c<size; ++c){
+			  if(this.tableauCoup[c][l]){
+				  if(tableauNom[c][l].isStruck()){
+            System.out.print(ColorUtil.colorize("x ", ColorUtil.Color.RED));
+          } else {
+            System.out.print("x ");
+          }
+			  } else {
+				  System.out.print(". ");
+			  }
+        // saut de ligne à la fin
+        if(c == size-1){
+          System.out.println("");
+        }
+		  }
+	  }
+    System.out.println("");
+  }
+
+  
   public int getSize(){
     return size;
   }
@@ -114,23 +162,12 @@ public class Board implements IBoard
         return false;
       } else {
         for(int i=0; i<ship.getLength(); ++i){
-          (tableauNom[coords.getX() - i][coords.getY()]).setShip(ship);
-          (tableauNom[coords.getX() - i][coords.getY()]).setStruck(false);
+          (tableauNom[coords.getX()][coords.getY() - i]).setShip(ship);
+          (tableauNom[coords.getX()][coords.getY() - i]).setStruck(false);
         }
         return true;
       }
     } else if(ship.getOrientation() == Orientation.SOUTH){
-      if(!canPutShip(ship, coords)){
-        System.out.println("Coordonnées invalides !");
-        return false;
-      } else {
-        for(int i=0; i<ship.getLength(); ++i){
-          (tableauNom[coords.getX() + i][coords.getY()]).setShip(ship);
-          (tableauNom[coords.getX() + i][coords.getY()]).setStruck(false);
-        }
-        return true;
-      }
-    } else if(ship.getOrientation() == Orientation.EAST){
       if(!canPutShip(ship, coords)){
         System.out.println("Coordonnées invalides !");
         return false;
@@ -141,23 +178,35 @@ public class Board implements IBoard
         }
         return true;
       }
-    } else {
+    } else if(ship.getOrientation() == Orientation.EAST){
       if(!canPutShip(ship, coords)){
         System.out.println("Coordonnées invalides !");
         return false;
       } else {
         for(int i=0; i<ship.getLength(); ++i){
-          (tableauNom[coords.getX()][coords.getY() - i]).setShip(ship);
-          (tableauNom[coords.getX()][coords.getY() - i]).setStruck(false);
+          (tableauNom[coords.getX() + i][coords.getY()]).setShip(ship);
+          (tableauNom[coords.getX() + i][coords.getY()]).setStruck(false);
+        }
+        return true;
+      }
+    } else if(ship.getOrientation() == Orientation.WEST){
+      if(!canPutShip(ship, coords)){
+        System.out.println("Coordonnées invalides !");
+        return false;
+      } else {
+        for(int i=0; i<ship.getLength(); ++i){
+          (tableauNom[coords.getX() - i][coords.getY()]).setShip(ship);
+          (tableauNom[coords.getX() - i][coords.getY()]).setStruck(false);
         }
         return true;
       }
     }
+    return false;
   }
 
 
   public boolean hasShip(Coords coords){
-    return ((tableauNom[coords.getX() - 1][coords.getY() - 1]).getShip().getName() == "NullShip");
+    return ((tableauNom[coords.getX()][coords.getY()]).getShip().getName() != "NullShip");
   }
 
 
@@ -166,12 +215,12 @@ public class Board implements IBoard
     Orientation o = ship.getOrientation();
     int dx = 0, dy = 0;
     if (o == Orientation.EAST) {
-      if (coords.getX() + ship.getLength() >= this.size) {
+      if (coords.getX() + ship.getLength() > this.size) {
         return false;
       }
       dx = 1;
     } else if (o == Orientation.SOUTH) {
-      if (coords.getY() + ship.getLength() >= this.size) {
+      if (coords.getY() + ship.getLength() > this.size) {
         return false;
       }
       dy = 1;
@@ -203,21 +252,18 @@ public class Board implements IBoard
 
   public Hit sendHit(int x, int y){
 
-    if(this.tableauCoup[x-1][y-1]){
+    if(this.tableauCoup[x][y]){
       System.out.println("Un coup a déjà été joué a cet endroit !");
       return Hit.MISS;
     } else {
-      if(tableauNom[x-1][y-1].getShip().getName() == "NullShip"){
-        System.out.println("Manqué !");
+      if(tableauNom[x][y].getShip().getName() == "NullShip"){
         return Hit.MISS;
       } else {
-        tableauNom[x-1][y-1].setStruck(true);
-        tableauNom[x-1][y-1].addStrike();
-        if(tableauNom[x-1][y-1].getShip().getStrikeCount() == tableauNom[x-1][y-1].getShip().getLength()){
-          System.out.println(tableauNom[x-1][y-1].getShip().getName() + " Coulé !");
-          return Hit.fromInt(tableauNom[x-1][y-1].getShip().getLength());
+        tableauNom[x][y].setStruck(true);
+        tableauNom[x][y].addStrike();
+        if(tableauNom[x][y].getShip().getStrikeCount() == tableauNom[x][y].getShip().getLength()){
+          return Hit.fromInt(tableauNom[x][y].getShip().getLength());
         }
-        System.out.println("Touché !");
         return Hit.STRIKE;
       }
     }  
@@ -225,5 +271,9 @@ public class Board implements IBoard
 
   public Boolean getHit(Coords coords){
     return tableauCoup[coords.getX()][coords.getY()];
+  }
+
+  public void setHit(boolean hit, Coords coords){
+    tableauCoup[coords.getX()][coords.getY()] = hit;
   }
 }

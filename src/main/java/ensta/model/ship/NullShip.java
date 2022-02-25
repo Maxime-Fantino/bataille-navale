@@ -4,6 +4,6 @@ import ensta.util.Orientation;
 
 public class NullShip extends AbstractShip{
     public NullShip(){
-        super("NullShip", 'N', 0, Orientation.WEST);
+        super("NullShip", '.', 0, Orientation.WEST);
     }
 }

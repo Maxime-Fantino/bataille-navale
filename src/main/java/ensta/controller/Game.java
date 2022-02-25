@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import ensta.ai.PlayerAI;
 import ensta.model.Board;
 import ensta.model.Coords;
 import ensta.model.Hit;
@@ -16,6 +17,10 @@ import ensta.model.ship.Carrier;
 import ensta.model.ship.Destroyer;
 import ensta.model.ship.Submarine;
 import ensta.util.ColorUtil;
+import ensta.view.InputHelper;
+import ensta.view.InputHelper.CoordInput;
+import ensta.view.InputHelper.ShipInput;;
+
 
 public class Game {
 
@@ -27,9 +32,8 @@ public class Game {
 	/*
 	 * *** Attributs
 	 */
-	private Player player1;
-	private Player player2;
-	private Scanner sin;
+	private Player me;
+	private PlayerAI opponent;
 
 	/*
 	 * *** Constructeurs
@@ -37,62 +41,74 @@ public class Game {
 	public Game() {
 	}
 
-	public Game init() {
+	public void init() {
 		if (!loadSave()) {
 
-
 			// TODO init boards
+			Board myBoard = new Board("board1");
+			Board opponentBoard = new Board("board2");
 
 			// TODO init this.player1 & this.player2
+			List<AbstractShip> myShips = createDefaultShips();
+			List<AbstractShip> opponentShips = createDefaultShips();
+			this.me = new Player(myBoard, opponentBoard, myShips);
+			this.opponent = new PlayerAI(opponentBoard, myBoard, opponentShips);
 
 			// TODO place player ships
+			opponent.putShips(opponentShips.toArray(new AbstractShip[0]));
+			me.putShips();
 		}
-		return this;
 	}
 
 	/*
 	 * *** Méthodes
 	 */
 	public void run() {
+		// INIT
+		this.init();
+
 		Coords coords = new Coords();
-		Board b1 = player1.getBoard();
+		Board opponentBoard = opponent.getBoard();
+		Board myBoard = me.getBoard();
+		boolean strike;
 		Hit hit;
 
-		// main loop
-		b1.print();
-		boolean done;
-		do {
-			hit = Hit.MISS; // TODO player1 send a hit
-			boolean strike = hit != Hit.MISS; // TODO set this hit on his board (b1)
 
-			done = updateScore();
-			b1.print();
-			System.out.println(makeHitMessage(false /* outgoing hit */, coords, hit));
+		// LOOP
+		do {
+			// Player 1
+			hit = me.sendHit(coords); 
+			strike = (hit != Hit.MISS); 
+			opponentBoard.setHit(strike, coords);
+			if (strike) {
+				opponentBoard.printCoups();
+			}
+			System.out.println(makeHitMessage(strike, coords, hit));
+			if(updateScore()){ break; }
+
+
 
 			// save();
+				
 
-			if (!done && !strike) {
-				do {
-					hit = Hit.MISS; // TODO player2 send a hit.
-
-					strike = hit != Hit.MISS;
-					if (strike) {
-						b1.print();
-					}
-					System.out.println(makeHitMessage(true /* incoming hit */, coords, hit));
-					done = updateScore();
-
-					if (!done) {
-//						save();
-					}
-				} while (strike && !done);
+			// Player 2
+			hit = opponent.sendHit(coords); 
+			strike = (hit != Hit.MISS); 
+			myBoard.setHit(strike, coords);		
+			if (strike) {
+				myBoard.printAll();
 			}
+			System.out.println(makeHitMessage(strike, coords, hit));
+			if(updateScore()){ break; }
 
-		} while (!done);
+				
+			
+			// save();
+				
+		} while (true);
 
 		SAVE_FILE.delete();
-		System.out.println(String.format("joueur %d gagne", player1.isLose() ? 2 : 1));
-		sin.close();
+		System.out.println(String.format("Joueur %d gagne ! \n", me.isLose() ? 2 : 1));
 	}
 
 	private void save() {
@@ -123,7 +139,7 @@ public class Game {
 	}
 
 	private boolean updateScore() {
-		for (Player player : new Player[] { player1, player2 }) {
+		for (Player player : new Player[] { me, opponent }) {
 			int destroyed = 0;
 			for (AbstractShip ship : player.getShips()) {
 				if (ship.isSunk()) {
@@ -155,13 +171,14 @@ public class Game {
 			msg = hit.toString() + " coulé";
 			color = ColorUtil.Color.RED;
 		}
-		msg = String.format("%s Frappe en %c%d : %s", incoming ? "<=" : "=>", ((char) ('A' + coords.getX())),
-				(coords.getY() + 1), msg);
+		msg = String.format("%s Frappe en %c%d : %s \n", incoming ? "<=" : "=>", ((char) ('A' + coords.getX())),
+				(coords.getY()), msg);
 		return ColorUtil.colorize(msg, color);
 	}
 
+
+
 	private static List<AbstractShip> createDefaultShips() {
-		return Arrays.asList(new AbstractShip[] { new Destroyer(), new Submarine(), new Submarine(), new BattleShip(),
-				new Carrier() });
+	return Arrays.asList(new AbstractShip[] { /*new Destroyer(), new Submarine(), new Submarine(), */new BattleShip(), new Carrier() });
 	}
 }

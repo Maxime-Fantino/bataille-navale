@@ -7,6 +7,7 @@ import ensta.model.ship.*;
 
 public class TestGame{
     public static void main(String args[]) {
+
         Board board = new Board("testBoard");
         AbstractShip[] ships = new AbstractShip[4];
         Carrier carrier = new Carrier();
@@ -18,6 +19,7 @@ public class TestGame{
         BattleShip battleShip = new BattleShip();
         ships[3] = battleShip;
 
+
         BattleShipsAI ai = new BattleShipsAI(board, board);
         int compteurDestroyed = 0;
 
@@ -26,15 +28,18 @@ public class TestGame{
         Random rd = new Random();
 
         while(compteurDestroyed < 4) {
+
             coords.setX(rd.nextInt(board.getSize()));
 			coords.setY(rd.nextInt(board.getSize()));
+
+
             hit = ai.sendHit(coords);
 
             if(hit == Hit.STRIKE){
                 compteurDestroyed++;
             }
 
-            board.print();
+            board.printAll();
 
             // attente pour plus de lisibilité 
             
